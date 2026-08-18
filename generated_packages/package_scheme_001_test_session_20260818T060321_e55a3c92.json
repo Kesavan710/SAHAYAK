@@ -1,0 +1,56 @@
+{
+  "package_id": "e55a3c92",
+  "generated_at": "2026-08-18T06:03:21.657979Z",
+  "scheme_id": "scheme_001",
+  "scheme_name": "Karnataka Rajyotsava Disability Scholarship",
+  "checklist": [
+    {
+      "document": "Bonafide Certificate from Institution",
+      "status": "available"
+    },
+    {
+      "document": "Aadhaar Card",
+      "status": "available"
+    },
+    {
+      "document": "Disability Certificate (SADAREM/UDID)",
+      "status": "missing"
+    },
+    {
+      "document": "Income Certificate (issued by Tahsildar)",
+      "status": "missing"
+    },
+    {
+      "document": "Bank Passbook (first page)",
+      "status": "missing"
+    },
+    {
+      "document": "Passport Size Photograph",
+      "status": "missing"
+    },
+    {
+      "document": "Previous Year Marks Card",
+      "status": "missing"
+    }
+  ],
+  "application_data": {
+    "Full Name": "Test Student",
+    "State": "Karnataka",
+    "Education Level": "UG",
+    "Year of Study": "2",
+    "Type of Disability": "visual",
+    "Disability Percentage": "80%",
+    "Annual Family Income (₹)": "₹140,000",
+    "Social Category": "General",
+    "Documents Available": "Aadhaar Card, Bonafide Certificate"
+  },
+  "submission_instructions": "HOW TO SUBMIT — Karnataka Rajyotsava Disability Scholarship\n\n1. Visit the application portal: https://sw.kar.nic.in/scholarship/apply\n2. Register or log in with your Aadhaar number.\n   ⚠  Sahayak will never ask for or store your Aadhaar OTP or password.\n      You must complete this authentication step yourself.\n3. Complete the CAPTCHA verification on the portal yourself.\n4. Fill in the application form using the details in this package.\n5. Upload scanned copies of each document in the checklist.\n6. Submit the form and note down your application/registration number.\n7. Keep a copy of the acknowledgement receipt.\n\nDeadline note: Applications typically open in June–July each academic year. Check the portal for current dates.\n\nIMPORTANT: Sahayak has NOT submitted this application on your behalf.\nSubmission status can only be confirmed by the government portal itself.",
+  "missing_profile_fields": [
+    "date_of_birth",
+    "district"
+  ],
+  "completeness_pct": 58,
+  "official_url": "https://sw.kar.nic.in/scholarship",
+  "source_document": "Karnataka_Disability_Scholarship_Guidelines_2023.pdf",
+  "disclaimer": "Sahayak has NOT submitted this application. You must complete government authentication, OTP, and CAPTCHA steps yourself."
+}

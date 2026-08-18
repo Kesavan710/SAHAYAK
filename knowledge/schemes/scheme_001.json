@@ -1,0 +1,33 @@
+{
+  "scheme_id": "scheme_001",
+  "name": "Karnataka Rajyotsava Disability Scholarship",
+  "state": "Karnataka",
+  "description": "State scholarship for students with disabilities pursuing undergraduate and postgraduate courses in Karnataka.",
+  "min_disability_percentage": 40,
+  "income_limit": 250000,
+  "education_levels": ["UG", "PG"],
+  "eligible_disability_types": ["visual", "hearing", "locomotor", "intellectual", "multiple", "other"],
+  "eligible_categories": ["General", "OBC", "SC", "ST", "EWS"],
+  "min_year": 1,
+  "max_year": 6,
+  "documents": [
+    "Disability Certificate (SADAREM/UDID)",
+    "Income Certificate (issued by Tahsildar)",
+    "Bonafide Certificate from Institution",
+    "Bank Passbook (first page)",
+    "Aadhaar Card",
+    "Passport Size Photograph",
+    "Previous Year Marks Card"
+  ],
+  "benefits": [
+    "Tuition fee reimbursement up to ₹15,000 per year",
+    "Maintenance allowance of ₹1,200 per month",
+    "Book grant of ₹1,500 per year"
+  ],
+  "benefit_amount_inr": 30900,
+  "official_url": "https://sw.kar.nic.in/scholarship",
+  "source_document": "Karnataka_Disability_Scholarship_Guidelines_2023.pdf",
+  "application_portal": "https://sw.kar.nic.in/scholarship/apply",
+  "deadline_note": "Applications typically open in June–July each academic year. Check the portal for current dates.",
+  "notes": "Applicant must be a resident of Karnataka. Disability certificate must be issued by a government-recognised medical authority."
+}

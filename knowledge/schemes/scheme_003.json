@@ -1,0 +1,35 @@
+{
+  "scheme_id": "scheme_003",
+  "name": "Saksham Scholarship Scheme (AICTE) — Specially Abled Students",
+  "state": "All India",
+  "description": "AICTE scholarship for specially abled students enrolled in degree-level technical education (Engineering, Technology, Architecture, Pharmacy, MCA, MBA) in AICTE-approved institutions.",
+  "min_disability_percentage": 40,
+  "income_limit": 800000,
+  "education_levels": ["UG", "PG"],
+  "eligible_disability_types": ["visual", "hearing", "locomotor", "intellectual", "multiple", "other"],
+  "eligible_categories": ["General", "OBC", "SC", "ST", "EWS"],
+  "eligible_courses": ["Engineering", "Technology", "Architecture", "Pharmacy", "MCA", "MBA"],
+  "min_year": 1,
+  "max_year": 4,
+  "documents": [
+    "Disability Certificate (40% or above)",
+    "Income Certificate (family income below ₹8 lakh per annum)",
+    "Bonafide Certificate from AICTE-approved institution",
+    "Bank Passbook (Aadhaar-linked)",
+    "Aadhaar Card",
+    "Passport Size Photograph",
+    "Previous Year Marks Card",
+    "Admission Letter / Enrollment Proof",
+    "AICTE Institution Approval Letter (institution provides this)"
+  ],
+  "benefits": [
+    "₹50,000 per annum (₹30,000 maintenance + ₹20,000 academic expenses)",
+    "Scholarship awarded for the entire duration of the approved course"
+  ],
+  "benefit_amount_inr": 50000,
+  "official_url": "https://www.aicte-india.org/schemes/students-development-schemes/Saksham",
+  "source_document": "AICTE_Saksham_Scholarship_2023-24_Guidelines.pdf",
+  "application_portal": "https://scholarships.gov.in",
+  "deadline_note": "Applications open on NSP portal (scholarships.gov.in) typically in September–October. Check AICTE website for current cycle dates.",
+  "notes": "Applicable only for AICTE-approved institutions and approved technical courses. Student must not be availing any other central government scholarship simultaneously. Family income limit is higher (₹8 lakh) compared to other disability scholarships."
+}

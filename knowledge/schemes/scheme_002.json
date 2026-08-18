@@ -1,0 +1,36 @@
+{
+  "scheme_id": "scheme_002",
+  "name": "National Scholarship for Persons with Disabilities (NIMHANS / NSP)",
+  "state": "All India",
+  "description": "Central government scholarship under the National Scholarship Portal for students with benchmark disabilities (40% or more) pursuing post-matric education.",
+  "min_disability_percentage": 40,
+  "income_limit": 250000,
+  "education_levels": ["Class 12", "Diploma", "UG", "PG", "PhD"],
+  "eligible_disability_types": ["visual", "hearing", "locomotor", "intellectual", "multiple", "other"],
+  "eligible_categories": ["General", "OBC", "SC", "ST", "EWS"],
+  "min_year": 1,
+  "max_year": 6,
+  "documents": [
+    "Disability Certificate (40% or above, issued by CMO/Civil Surgeon)",
+    "Income Certificate (family income below ₹2.5 lakh per annum)",
+    "Bonafide / Enrollment Certificate",
+    "Bank Account Details (Aadhaar-linked account preferred)",
+    "Aadhaar Card",
+    "Passport Size Photograph",
+    "Previous Year Marks Card / Admit Card",
+    "Institution Verification Letter"
+  ],
+  "benefits": [
+    "Scholarship amount varies by course level",
+    "Class 12 / Diploma: ₹1,000 per month",
+    "UG: ₹2,000 per month",
+    "PG / PhD: ₹2,000 per month",
+    "Additional allowances for reader, escort, and transport for severely disabled students"
+  ],
+  "benefit_amount_inr": 24000,
+  "official_url": "https://scholarships.gov.in",
+  "source_document": "NSP_Disability_Scholarship_Guidelines_2023-24.pdf",
+  "application_portal": "https://scholarships.gov.in/fresh/loginPage",
+  "deadline_note": "NSP applications typically open August–October. Renewal by November. Check scholarships.gov.in for exact dates.",
+  "notes": "Applicant must not be availing any other scholarship from central/state government simultaneously. UDID card is preferred but not mandatory if CMO certificate is valid."
+}
