@@ -1,0 +1,71 @@
+[
+  {
+    "id": "igndps",
+    "name": "Indira Gandhi National Disability Pension Scheme (IGNDPS)",
+    "description": "Monthly pension assistance for BPL (Below Poverty Line) disabled citizens aged 18 and above.",
+    "eligible": true,
+    "state": "all",
+    "matchReasons": [
+      "BPL status matches",
+      "Disability certificate requirement met"
+    ],
+    "benefits": [
+      "Monthly financial assistance of ₹300–500",
+      "Direct bank transfer"
+    ],
+    "eligibilityCriteria": [
+      "Age 18 years and above",
+      "Disability of 80% or more",
+      "Below Poverty Line (BPL) household",
+      "Valid disability certificate from competent authority"
+    ],
+    "officialUrl": "https://nsap.nic.in",
+    "ministry": "Ministry of Rural Development",
+    "category": "Pension"
+  },
+  {
+    "id": "adip",
+    "name": "Assistive Devices for PwD (ADIP Scheme)",
+    "description": "Free assistive devices such as wheelchairs, hearing aids, and prosthetics for persons with disabilities with annual income below ₹2,50,000.",
+    "eligible": true,
+    "state": "all",
+    "matchReasons": [
+      "Income below ₹2,50,000 threshold",
+      "Disability type qualifies"
+    ],
+    "benefits": [
+      "Free wheelchair/hearing aid/prosthetics",
+      "Home delivery available"
+    ],
+    "eligibilityCriteria": [
+      "Person with disability (PwD) with valid certificate",
+      "Annual family income below ₹2,50,000",
+      "Not availed similar benefit in the last 3 years"
+    ],
+    "officialUrl": "https://alimco.in",
+    "ministry": "Ministry of Social Justice and Empowerment",
+    "category": "Assistive Devices"
+  },
+  {
+    "id": "nhfdc",
+    "name": "National Handicapped Finance Development Corporation (NHFDC)",
+    "description": "Concessional loans and skill training support for disabled entrepreneurs and self-employment initiatives.",
+    "eligible": false,
+    "notEligibleReason": "Requires active business registration or startup plan",
+    "state": "all",
+    "matchReasons": [],
+    "benefits": [
+      "Concessional loans up to ₹25 lakh",
+      "Skill training support"
+    ],
+    "eligibilityCriteria": [
+      "Person with disability (PwD) with valid certificate",
+      "Age between 18 and 55 years",
+      "Active business registration or viable business plan",
+      "Annual family income below ₹3,00,000 for concessional rates"
+    ],
+    "officialUrl": "https://nhfdc.nic.in",
+    "ministry": "Ministry of Social Justice and Empowerment",
+    "category": "Entrepreneurship & Loans"
+  }
+]
