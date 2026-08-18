@@ -1,0 +1,19 @@
+# FastAPI and Web Framework
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+pydantic>=2.5.0
+python-multipart>=0.0.6
+
+# Azure AI Foundry
+azure-ai-projects>=1.0.0
+azure-identity>=1.15.0
+
+# Environment and Configuration
+python-dotenv>=1.0.0
+
+# Optional: For PDF generation (if implementing real PDF output)
+# reportlab>=4.0.0
+# pypdf2>=3.0.0
+
+# Optional: For enhanced logging
+# structlog>=24.1.0
