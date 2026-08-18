@@ -1,13 +1,17 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect } from "react";
 import type { VoiceState } from "@/types";
+import { useSpeechRecognition } from "./useSpeechRecognition";
+import { speak as ttsSpeak, stopSpeaking, isTTSSupported } from "@/services/speech";
 
 export type { VoiceState };
 
 interface UseVoiceOptions {
+  /** Called when speech recognition completes with a final transcript */
   onListenEnd?: (transcript: string) => void;
+  /** Called when TTS finishes speaking */
   onSpeakEnd?: () => void;
-  listenDuration?: number;
-  simulatedTranscript?: string;
+  /** BCP-47 language code for speech recognition (e.g., "en-IN", "kn-IN") */
+  speechCode?: string;
 }
 
 interface UseVoiceReturn {
@@ -16,87 +20,150 @@ interface UseVoiceReturn {
   startListening: () => void;
   stopListening: () => void;
   speak: (text: string) => void;
+  /** True if speech recognition is supported in this browser */
+  isSupported: boolean;
+  /** Current error message, if any */
+  error: string | null;
 }
 
 export function useVoice(options: UseVoiceOptions = {}): UseVoiceReturn {
   const {
     onListenEnd,
     onSpeakEnd,
-    listenDuration = 3000,
-    simulatedTranscript = "",
+    speechCode = "en-IN",
   } = options;
 
   const [state, setState] = useState<VoiceState>("idle");
-  const [transcript, setTranscript] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
-  const listenTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const processTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const speakTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Use real speech recognition hook
+  const {
+    transcript,
+    isListening,
+    isSupported,
+    permissionState,
+    startListening: startSTT,
+    stopListening: stopSTT,
+    resetTranscript,
+    error: sttError,
+  } = useSpeechRecognition();
 
-  const clearAllTimers = useCallback(() => {
-    if (listenTimerRef.current !== null) {
-      clearTimeout(listenTimerRef.current);
-      listenTimerRef.current = null;
-    }
-    if (processTimerRef.current !== null) {
-      clearTimeout(processTimerRef.current);
-      processTimerRef.current = null;
-    }
-    if (speakTimerRef.current !== null) {
-      clearTimeout(speakTimerRef.current);
-      speakTimerRef.current = null;
-    }
-  }, []);
+  // ── Start listening ────────────────────────────────────────────────────────
 
   const startListening = useCallback(() => {
-    clearAllTimers();
+    setError(null);
+    resetTranscript();
     setState("listening");
-    setTranscript("");
 
-    // After listenDuration → processing
-    listenTimerRef.current = setTimeout(() => {
-      setState("processing");
-
-      // After 1200ms → speaking
-      processTimerRef.current = setTimeout(() => {
-        const captured = simulatedTranscript || "";
-        setTranscript(captured);
-        setState("speaking");
-        onListenEnd?.(captured);
-
-        // After 2200ms → idle
-        speakTimerRef.current = setTimeout(() => {
+    startSTT(speechCode, (finalTranscript) => {
+      // Called when speech recognition produces a final result
+      if (finalTranscript.trim()) {
+        setState("processing");
+        // Small delay to show processing state before callback
+        setTimeout(() => {
           setState("idle");
-          onSpeakEnd?.();
-        }, 2200);
-      }, 1200);
-    }, listenDuration);
-  }, [clearAllTimers, listenDuration, simulatedTranscript, onListenEnd, onSpeakEnd]);
+          onListenEnd?.(finalTranscript);
+        }, 300);
+      } else {
+        // Empty transcript - just return to idle
+        setState("idle");
+      }
+    });
+  }, [speechCode, startSTT, onListenEnd, resetTranscript]);
+
+  // ── Stop listening ─────────────────────────────────────────────────────────
 
   const stopListening = useCallback(() => {
-    clearAllTimers();
+    stopSTT();
     setState("idle");
-    setTranscript("");
-  }, [clearAllTimers]);
+    setError(null);
+  }, [stopSTT]);
 
-  const speak = useCallback((text: string) => {
-    if (typeof window !== "undefined" && window.speechSynthesis) {
-      try {
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-        window.speechSynthesis.speak(utterance);
-      } catch {
-        // Graceful fallback: speech synthesis unavailable
+  // ── Speak (TTS) ────────────────────────────────────────────────────────────
+
+  const speak = useCallback(
+    (text: string) => {
+      if (!text?.trim()) {
+        onSpeakEnd?.();
+        return;
+      }
+
+      if (!isTTSSupported()) {
+        console.warn("[useVoice] TTS not supported in this browser");
+        onSpeakEnd?.();
+        return;
+      }
+
+      setState("speaking");
+
+      ttsSpeak(
+        text,
+        speechCode,
+        () => {
+          // onEnd
+          setState("idle");
+          onSpeakEnd?.();
+        },
+        () => {
+          // onStart
+          setState("speaking");
+        }
+      );
+    },
+    [speechCode, onSpeakEnd]
+  );
+
+  // ── Sync state with speech recognition ─────────────────────────────────────
+
+  useEffect(() => {
+    if (!isListening && state === "listening") {
+      // Recognition stopped but we're still in listening state
+      // Check if there was an error
+      if (sttError) {
+        setState("idle");
+        // Map STT errors to user-friendly messages
+        switch (sttError) {
+          case "UNSUPPORTED":
+            setError("Voice input is not supported in this browser.");
+            break;
+          case "PERMISSION_DENIED":
+            setError("Microphone access was denied. Please allow microphone access.");
+            break;
+          case "NO_SPEECH":
+            setError("No speech detected. Please try again.");
+            break;
+          case "NETWORK_ERROR":
+            setError("Network error. Please check your connection.");
+            break;
+          case "MIC_ERROR":
+            setError("Microphone error. Please check your microphone.");
+            break;
+          default:
+            setError("Voice recognition error. Please try again.");
+        }
+      } else if (!transcript.trim()) {
+        // No error, but also no transcript - user probably didn't speak
+        setState("idle");
       }
     }
-  }, []);
+  }, [isListening, state, sttError, transcript]);
 
-  // Clean up all timers on unmount
+  // ── Cleanup ────────────────────────────────────────────────────────────────
+
   useEffect(() => {
     return () => {
-      clearAllTimers();
+      stopSTT();
+      stopSpeaking();
     };
-  }, [clearAllTimers]);
+  }, [stopSTT]);
 
-  return { state, transcript, startListening, stopListening, speak };
+  return {
+    state,
+    transcript,
+    startListening,
+    stopListening,
+    speak,
+    isSupported,
+    error,
+  };
 }

@@ -16,6 +16,35 @@ export type VoiceState = "idle" | "listening" | "processing" | "speaking";
 /** State of the microphone / speech-recognition input */
 export type ListenState = "idle" | "listening" | "recognized";
 
+/** Speech recognition error types from Web Speech API */
+export type SpeechRecognitionError =
+  | "UNSUPPORTED"
+  | "PERMISSION_DENIED"
+  | "NO_SPEECH"
+  | "NETWORK_ERROR"
+  | "MIC_ERROR"
+  | "RECOGNITION_ERROR";
+
+/** Microphone permission state */
+export type PermissionState = "unknown" | "granted" | "denied" | "error";
+
+/** Localized UI strings for voice interaction */
+export interface VoiceUIStrings {
+  greeting: string;
+  placeholder: string;
+  thinking: string;
+  listening: string;
+  speaking: string;
+  error: string;
+  micDenied: string;
+  micUnsupported: string;
+  sendLabel: string;
+  tapToSpeak: string;
+  stopListening: string;
+  stopSpeaking: string;
+  networkError: string;
+}
+
 // ─── Accessibility ─────────────────────────────────────────────────────────
 
 export type TextSize = "normal" | "large" | "larger";
@@ -27,6 +56,10 @@ export interface Lang {
   name: string;
   /** Language name written in its own script */
   native: string;
+  /** BCP-47 language code for Web Speech API (e.g. "en-IN", "kn-IN") */
+  speechCode: string;
+  /** Localized UI strings for voice interaction */
+  ui: VoiceUIStrings;
 }
 
 export interface A11ySettings {

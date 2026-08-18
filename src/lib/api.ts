@@ -4,13 +4,13 @@
  * HOW TO CONNECT TO THE REAL BACKEND
  * ─────────────────────────────────────────────────────────────────────────
  * 1. Set VITE_API_URL in your .env file, e.g.:
- *      VITE_API_URL=https://api.sahayak.gov.in/v1
+ *      VITE_API_URL=http://localhost:8000
  *
- * 2. The FastAPI backend is expected to expose:
- *      POST   /conversation/chat
- *      POST   /schemes/search
- *      GET    /status/:registrationNumber
- *      POST   /documents/upload
+ * 2. The FastAPI backend exposes:
+ *      POST   /api/v1/chat
+ *      POST   /api/v1/schemes/search
+ *      GET    /api/v1/status/:registrationNumber
+ *      POST   /api/v1/documents/upload
  *
  * 3. Authentication: add your bearer token to VITE_API_TOKEN in .env.
  *    The request helper below will attach it automatically.
@@ -20,7 +20,7 @@
  * ─────────────────────────────────────────────────────────────────────────
  */
 
-import type { ApiError, ConvContext, Scheme, StatusResult } from "@/types";
+import type { ApiError, Scheme, StatusResult } from "@/types";
 import { MOCK_SCHEMES, DEMO_STATUS, DEMO_REG_NUMBER } from "@/constants";
 import { delay } from "@/lib/utils";
 
@@ -36,21 +36,38 @@ const MOCK_DELAY_MAX = 1400;
 
 // ─── Request / Response types ──────────────────────────────────────────────
 
+/**
+ * Chat request matching Azure AI Foundry backend contract
+ */
 export interface ChatRequest {
   message: string;
-  sessionId: string;
-  context: ConvContext;
+  user_id?: string | null;
+  conversation_id?: string | null;
 }
 
+/**
+ * Tool call information from Foundry agent
+ */
+export interface ToolCall {
+  tool: string;
+  arguments: Record<string, any>;
+  result: Record<string, any>;
+}
+
+/**
+ * Chat response from Azure AI Foundry backend
+ */
 export interface ChatResponse {
-  reply: string;
-  sessionId: string;
-  /** Structured data the agent wants to surface (e.g. matched schemes) */
-  data?: unknown;
+  success: boolean;
+  response: string;
+  conversation_id: string;
+  tool_calls: ToolCall[];
+  iterations: number;
 }
 
 export interface SchemeSearchRequest {
-  context: ConvContext;
+  user_id?: string;
+  conversation_id?: string;
 }
 
 export interface SchemeSearchResponse {
@@ -138,80 +155,99 @@ async function request<T>(
  * Send a user message to the AI agent and receive a reply.
  *
  * MOCK: Returns a contextual canned reply based on the message content.
- * REAL: POST /conversation/chat  →  ChatResponse
+ * REAL: POST /api/v1/chat  →  ChatResponse
  */
 async function chat(
   message: string,
-  sessionId: string,
-  context: ConvContext
+  conversationId?: string | null,
+  userId?: string | null
 ): Promise<ChatResponse> {
   if (IS_MOCK) {
     await mockDelay();
 
+    // Generate conversation ID if not provided
+    const conversation_id = conversationId || `mock_conv_${Date.now()}`;
+
     // Produce a context-aware mock reply for demo purposes
-    let reply =
+    let response =
       "I have noted your response. Let me look up the relevant schemes for you.";
 
     const lower = message.toLowerCase();
     if (lower.includes("pension") || lower.includes("viklang")) {
-      reply =
+      response =
         "The PM Viklang Samman Pension Yojana provides a monthly pension to persons with disabilities. Based on your profile, you appear to be eligible. Shall I walk you through the application process?";
     } else if (lower.includes("house") || lower.includes("awas")) {
-      reply =
+      response =
         "PMAY-EWS provides housing assistance. However, eligibility depends on income and existing property ownership. Let me verify your profile details.";
     } else if (lower.includes("document") || lower.includes("certificate")) {
-      reply =
+      response =
         "The key documents you will need are: Aadhaar Card, Disability Certificate (UDID), Income Certificate, and Bank Passbook. I can guide you on how to obtain any missing documents.";
     } else if (lower.includes("status") || lower.includes("application")) {
-      reply = `To check your application status, please share your registration number. Your demo registration number is ${DEMO_REG_NUMBER}.`;
-    } else if (context.state) {
-      reply = `I have noted that you are from ${context.state}. ${
-        context.disability
-          ? `With ${context.disability}, you may qualify for several central and state-level schemes. `
-          : ""
-      }Let me find the best matches for your profile.`;
+      response = `To check your application status, please share your registration number. Your demo registration number is ${DEMO_REG_NUMBER}.`;
+    } else if (lower.includes("scheme") || lower.includes("help")) {
+      response =
+        "I can help you discover government schemes for persons with disabilities. To provide personalized recommendations, I'll need some information. Which state do you live in?";
     }
 
-    return { reply, sessionId };
+    return {
+      success: true,
+      response,
+      conversation_id,
+      tool_calls: [],
+      iterations: 0,
+    };
   }
 
   // ── Real backend ────────────────────────────────────────────────────────
-  return request<ChatResponse>("/conversation/chat", {
+  const requestBody: ChatRequest = {
+    message,
+    conversation_id: conversationId,
+    user_id: userId,
+  };
+
+  const backendResponse = await request<ChatResponse>("/api/v1/chat", {
     method: "POST",
-    body: JSON.stringify({ message, sessionId, context } satisfies ChatRequest),
+    body: JSON.stringify(requestBody),
   });
+
+  // Validate backend response
+  if (!backendResponse.success) {
+    throw {
+      code: "BACKEND_ERROR",
+      message: backendResponse.response || "Backend returned success=false",
+    } as ApiError;
+  }
+
+  return backendResponse;
 }
 
 // ─── schemes.search ────────────────────────────────────────────────────────
 
 /**
- * Search for government schemes matching the given eligibility context.
+ * Search for government schemes matching the given eligibility criteria.
  *
- * MOCK: Returns a filtered subset of MOCK_SCHEMES based on income/disability.
- * REAL: POST /schemes/search  →  SchemeSearchResponse
+ * MOCK: Returns a filtered subset of MOCK_SCHEMES.
+ * REAL: POST /api/v1/schemes/search  →  SchemeSearchResponse
  */
-async function searchSchemes(context: ConvContext): Promise<Scheme[]> {
+async function searchSchemes(
+  conversationId?: string,
+  userId?: string
+): Promise<Scheme[]> {
   if (IS_MOCK) {
     await mockDelay();
-
-    // Basic mock filtering — income above ₹5 lakh hides PMAY EWS as not relevant
-    const income = context.income ?? "";
-    const highIncome =
-      income.includes("5,00,000") || income.includes("8,00,000") || income.includes("Above");
-
-    return MOCK_SCHEMES.filter((s) => {
-      if (highIncome && s.id === "scheme-pmay-ews") {
-        // Still return it but it is already marked not eligible
-        return true;
-      }
-      return true;
-    });
+    // Return all mock schemes in demo mode
+    return MOCK_SCHEMES;
   }
 
   // ── Real backend ────────────────────────────────────────────────────────
-  const response = await request<SchemeSearchResponse>("/schemes/search", {
+  const requestBody: SchemeSearchRequest = {
+    conversation_id: conversationId,
+    user_id: userId,
+  };
+
+  const response = await request<SchemeSearchResponse>("/api/v1/schemes/search", {
     method: "POST",
-    body: JSON.stringify({ context } satisfies SchemeSearchRequest),
+    body: JSON.stringify(requestBody),
   });
   return response.schemes;
 }
@@ -222,7 +258,7 @@ async function searchSchemes(context: ConvContext): Promise<Scheme[]> {
  * Look up the status of an application by registration number.
  *
  * MOCK: Returns DEMO_STATUS for the demo registration number, null otherwise.
- * REAL: GET /status/:registrationNumber  →  StatusLookupResponse
+ * REAL: GET /api/v1/status/:registrationNumber  →  StatusLookupResponse
  */
 async function lookupStatus(regNum: string): Promise<StatusResult | null> {
   if (IS_MOCK) {
@@ -241,7 +277,7 @@ async function lookupStatus(regNum: string): Promise<StatusResult | null> {
   // ── Real backend ────────────────────────────────────────────────────────
   const encoded = encodeURIComponent(regNum.trim());
   const response = await request<StatusLookupResponse>(
-    `/status/${encoded}`,
+    `/api/v1/status/${encoded}`,
     { method: "GET" }
   );
   return response.result;
@@ -275,7 +311,7 @@ async function uploadDocument(
 
   let response: Response;
   try {
-    response = await fetch(`${API_BASE}/documents/upload`, {
+    response = await fetch(`${API_BASE}/api/v1/documents/upload`, {
       method: "POST",
       headers: API_TOKEN ? { Authorization: `Bearer ${API_TOKEN}` } : {},
       body: form,

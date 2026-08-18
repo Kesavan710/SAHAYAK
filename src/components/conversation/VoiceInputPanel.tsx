@@ -5,6 +5,7 @@ import React, {
   useEffect,
 } from "react";
 import { WAVEFORM_HEIGHTS } from "@/constants";
+import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -21,6 +22,8 @@ interface VoiceInputPanelProps {
   placeholder?: string;
   /** Show the "or" divider between chips and the voice section. Default true. */
   showOrDivider?: boolean;
+  /** BCP-47 language code for speech recognition (e.g., "en-IN", "kn-IN") */
+  speechCode?: string;
 }
 
 // ─── Helper: section divider ─────────────────────────────────────────────────
@@ -114,44 +117,75 @@ export function VoiceInputPanel({
   hc = false,
   placeholder = "Type your answer…",
   showOrDivider = true,
+  speechCode = "en-IN",
 }: VoiceInputPanelProps) {
   const [listenState, setListenState] = useState<ListenState>("idle");
   const [recognizedText, setRecognizedText] = useState("");
   const [textInput, setTextInput] = useState("");
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const listenTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // ── Voice simulation ──────────────────────────────────────────────────────
+  // ── Real speech recognition ────────────────────────────────────────────────
+
+  const {
+    transcript,
+    interimTranscript,
+    isListening,
+    isSupported,
+    permissionState,
+    startListening: startSTT,
+    stopListening: stopSTT,
+    resetTranscript,
+    error: sttError,
+  } = useSpeechRecognition();
+
+  // ── Start listening ────────────────────────────────────────────────────────
 
   const startListening = useCallback(() => {
     if (disabled) return;
-    if (listenTimerRef.current !== null) clearTimeout(listenTimerRef.current);
+    if (!isSupported) {
+      setErrorMsg("Voice input is not supported in this browser.");
+      return;
+    }
 
-    setListenState("listening");
+    setErrorMsg(null);
     setRecognizedText("");
+    resetTranscript();
+    setListenState("listening");
 
-    listenTimerRef.current = setTimeout(() => {
-      const captured = options.length > 0 ? options[0] : "Yes";
-      setRecognizedText(captured);
-      setListenState("recognized");
-    }, 2600);
-  }, [disabled, options]);
+    startSTT(speechCode, (finalTranscript) => {
+      // Called when recognition produces a final result
+      if (finalTranscript.trim()) {
+        setRecognizedText(finalTranscript);
+        setListenState("recognized");
+      } else {
+        // Empty transcript
+        setListenState("idle");
+      }
+    });
+  }, [disabled, isSupported, speechCode, startSTT, resetTranscript]);
+
+  // ── Stop listening ─────────────────────────────────────────────────────────
 
   const stopListening = useCallback(() => {
-    if (listenTimerRef.current !== null) {
-      clearTimeout(listenTimerRef.current);
-      listenTimerRef.current = null;
-    }
+    stopSTT();
     setListenState("idle");
     setRecognizedText("");
-  }, []);
+    setErrorMsg(null);
+  }, [stopSTT]);
+
+  // ── Confirm voice ──────────────────────────────────────────────────────────
 
   const confirmVoice = useCallback(() => {
-    onAnswer(recognizedText);
-    setListenState("idle");
-    setRecognizedText("");
+    if (recognizedText.trim()) {
+      onAnswer(recognizedText);
+      setListenState("idle");
+      setRecognizedText("");
+    }
   }, [onAnswer, recognizedText]);
+
+  // ── Edit voice ─────────────────────────────────────────────────────────────
 
   const editVoice = useCallback(() => {
     setTextInput(recognizedText);
@@ -182,13 +216,41 @@ export function VoiceInputPanel({
     [submitText]
   );
 
+  // ── Sync with speech recognition state ─────────────────────────────────────
+
+  useEffect(() => {
+    // Map STT errors to user-friendly messages
+    if (sttError) {
+      setListenState("idle");
+      switch (sttError) {
+        case "UNSUPPORTED":
+          setErrorMsg("Voice input is not supported in this browser.");
+          break;
+        case "PERMISSION_DENIED":
+          setErrorMsg("Microphone access was denied. Please allow microphone access in your browser settings.");
+          break;
+        case "NO_SPEECH":
+          setErrorMsg("No speech detected. Please try again.");
+          break;
+        case "NETWORK_ERROR":
+          setErrorMsg("Network error. Please check your connection and try again.");
+          break;
+        case "MIC_ERROR":
+          setErrorMsg("Microphone error. Please check that your microphone is connected and working.");
+          break;
+        default:
+          setErrorMsg("Voice recognition error. Please try again.");
+      }
+    }
+  }, [sttError]);
+
   // ── Cleanup ───────────────────────────────────────────────────────────────
 
   useEffect(() => {
     return () => {
-      if (listenTimerRef.current !== null) clearTimeout(listenTimerRef.current);
+      stopSTT();
     };
-  }, []);
+  }, [stopSTT]);
 
   // ── Color tokens ──────────────────────────────────────────────────────────
 
@@ -248,10 +310,27 @@ export function VoiceInputPanel({
           Speak your answer
         </p>
 
-        {listenState === "idle" && (
+        {/* Error message */}
+        {errorMsg && listenState === "idle" && (
+          <div
+            className={`
+              w-full p-3 rounded-xl text-sm
+              ${
+                hc
+                  ? "border-2 border-black bg-white text-black"
+                  : "border border-red-200 bg-red-50 text-red-800"
+              }
+            `}
+            role="alert"
+          >
+            {errorMsg}
+          </div>
+        )}
+
+        {listenState === "idle" && !errorMsg && (
           <button
             type="button"
-            disabled={disabled}
+            disabled={disabled || !isSupported}
             onClick={startListening}
             className={`
               w-full flex items-center justify-center gap-2
@@ -263,42 +342,53 @@ export function VoiceInputPanel({
             aria-label="Start voice input"
           >
             <MicIcon className="w-5 h-5" />
-            Tap to speak
+            {isSupported ? "Tap to speak" : "Voice input not supported"}
           </button>
         )}
 
         {listenState === "listening" && (
           <div
             className={`
-              w-full flex items-center justify-between gap-3
-              min-h-[52px] px-4 rounded-xl
+              w-full flex flex-col gap-2 p-4 rounded-xl
               ${hc ? "border-2 border-black bg-white" : "border-2 border-blue-400 bg-blue-50"}
             `}
           >
-            <Waveform hc={hc} />
-            <span
-              className={`text-sm font-medium flex-1 text-center ${
-                hc ? "text-black" : "text-blue-700"
-              }`}
-            >
-              Listening…
-            </span>
-            <button
-              type="button"
-              onClick={stopListening}
-              aria-label="Stop listening"
-              className={`
-                w-8 h-8 flex items-center justify-center rounded-full
-                font-bold text-sm transition-colors
-                ${
-                  hc
-                    ? "bg-black text-white hover:bg-slate-800"
-                    : "bg-blue-600 text-white hover:bg-blue-700"
-                }
-              `}
-            >
-              ✕
-            </button>
+            <div className="flex items-center justify-between gap-3">
+              <Waveform hc={hc} />
+              <span
+                className={`text-sm font-medium flex-1 text-center ${
+                  hc ? "text-black" : "text-blue-700"
+                }`}
+              >
+                Listening…
+              </span>
+              <button
+                type="button"
+                onClick={stopListening}
+                aria-label="Stop listening"
+                className={`
+                  w-8 h-8 flex items-center justify-center rounded-full
+                  font-bold text-sm transition-colors
+                  ${
+                    hc
+                      ? "bg-black text-white hover:bg-slate-800"
+                      : "bg-blue-600 text-white hover:bg-blue-700"
+                  }
+                `}
+              >
+                ✕
+              </button>
+            </div>
+            {/* Show interim transcript */}
+            {interimTranscript && (
+              <p
+                className={`text-sm italic ${
+                  hc ? "text-slate-700" : "text-blue-600"
+                }`}
+              >
+                "{interimTranscript}"
+              </p>
+            )}
           </div>
         )}
 

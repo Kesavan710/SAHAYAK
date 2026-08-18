@@ -84,7 +84,7 @@ export default function App() {
   }, []);
 
   const voice = useVoice({
-    simulatedTranscript: "What government schemes can I apply for?",
+    speechCode: lang.speechCode,
     onListenEnd: (transcript) => {
       if (transcript) startConversation(transcript, true);
     },
@@ -273,6 +273,7 @@ export default function App() {
                 isLoading={isLoading}
                 messagesEndRef={messagesEndRef}
                 onAnswer={handleAnswer}
+                lang={lang}
               />
             </PageWrap>
           )}
@@ -624,9 +625,10 @@ interface ConversationViewProps {
   isLoading: boolean;
   messagesEndRef: RefObject<HTMLDivElement>;
   onAnswer: (text: string) => void;
+  lang: Lang;
 }
 
-function ConversationView({ messages, step, isLoading, messagesEndRef, onAnswer }: ConversationViewProps) {
+function ConversationView({ messages, step, isLoading, messagesEndRef, onAnswer, lang }: ConversationViewProps) {
   const t = useT();
   const STEP_TEXTS = [t.convStep0, t.convStep1, t.convStep2, t.convStep3];
   const currentStep = CONV_STEPS[step];
@@ -736,6 +738,7 @@ function ConversationView({ messages, step, isLoading, messagesEndRef, onAnswer 
                   options={currentStep.options}
                   onAnswer={onAnswer}
                   hc={false}
+                  speechCode={lang.speechCode}
                 />
               </div>
             )
