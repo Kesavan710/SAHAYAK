@@ -30,119 +30,74 @@ env.bak/
 venv.bak/
 .venv/
 
-# PyCharm
-.idea/
-
-# VS Code
-.vscode/
-*.code-workspace
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# IPython
-profile_default/
-ipython_config.py
-
-# pyenv
-.python-version
-
 # Environments
 .env
 .env.local
 .env.*.local
 *.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
 
-# Environment variables (IMPORTANT - contains secrets)
-# Note: Keep .env in gitignore to protect API keys!
-
-# Testing
-.pytest_cache/
-.coverage
-.coverage.*
-htmlcov/
-.tox/
-.nox/
-coverage.xml
-*.cover
-*.log
-
-# MyPy
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# Pyre
-.pyre/
-
-# pytype
-.pytype/
-
-# Cython debug symbols
-cython_debug/
-
-# macOS
-.DS_Store
-.AppleDouble
-.LSOverride
-._*
-
-# Linux
-*~
-.directory
-.Trash-*
-
-# Windows
-Thumbs.db
-Thumbs.db:encryptable
-ehthumbs.db
-ehthumbs_vista.db
-*.stackdump
-[Dd]esktop.ini
-$RECYCLE.BIN/
-*.lnk
-
-# Node.js (if you add a frontend)
+# Node.js / Frontend
 node_modules/
+/.pnp
+.pnp.js
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.npm
-.eslintcache
-.node_repl_history
-*.tgz
-.yarn-integrity
+pnpm-debug.log*
+lerna-debug.log*
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
 
 # Frontend build files
 frontend/build/
 frontend/dist/
 frontend/.next/
 frontend/out/
+/coverage
+*.local
+
+# IDEs
+.idea/
+.vscode/
+*.code-workspace
+*.sublime-project
+*.sublime-workspace
+.vscode/settings.json
+.vscode/launch.json
+.vscode/extensions.json
+
+# OS files
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+Thumbs.db
+*.swp
+*.swo
+*~
+[Dd]esktop.ini
+$RECYCLE.BIN/
 
 # Logs
 logs/
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
-pids
 *.pid
 *.seed
 *.pid.lock
 
-# Azure & Cloud
-.azure/
-*.publishsettings
-
-# Temporary files
-tmp/
-temp/
-*.tmp
-*.bak
-*.swp
-*.swo
-*~
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+*.cover
+test-results/
+test_output/
 
 # Database
 *.db
@@ -150,108 +105,14 @@ temp/
 *.sqlite3
 *.sql
 
-# S3 / File uploads (local cache)
+# Uploads & Generated files
 uploads/
 downloads/
-*.pdf
-*.docx
 generated_pdfs/
-
-# Application specific
-# Uncomment if you don't want to track these:
-# backend/knowledge/schemes/*.pdf
-# backend/knowledge/schemes/*.json
-
-# Generated documentation
-docs/_build/
-site/
-
-# Test outputs
-test-results/
-test_output/
-
-# Coverage reports
-coverage/
-.nyc_output/
-
-# IDEs
-*.sublime-project
-*.sublime-workspace
-.vscode/settings.json
-.vscode/launch.json
-.vscode/extensions.json
-
-# JetBrains IDEs
-.idea/
-*.iml
-*.iws
-out/
-
-# Compiled files
-*.com
-*.class
-*.dll
-*.exe
-*.o
-*.so
-
-# Package files
-*.7z
-*.dmg
-*.gz
-*.iso
-*.jar
-*.rar
-*.tar
-*.zip
-
-# Backup files
-*.bak
-*.gho
-*.ori
-*.orig
-*.tmp
-
-# Project specific - Sahayak
-# S3 cached files
-backend/s3_cache/
-
-# Application state (if storing locally)
-backend/application_state/
-backend/.application_cache/
-
-# Generated files
 backend/generated/
-backend/exports/
-
-# Scheme documents (if sensitive)
-# Uncomment if you want to keep scheme docs private:
-# backend/knowledge/schemes/*
-
-# User data (never commit)
-backend/user_data/
 backend/uploads/
 
-# Vector store files (if cached locally)
-backend/vector_stores/
-*.faiss
-*.index
-
-# Model files (if downloaded)
-*.h5
-*.pkl
-*.pth
-*.onnx
-models/
-
-# Large files
-*.mp4
-*.avi
-*.mov
-*.mp3
-*.wav
-
-# Secrets and credentials (CRITICAL)
+# Secrets (CRITICAL)
 *secret*
 *credential*
 *password*
@@ -259,101 +120,28 @@ models/
 *.key
 *.cert
 *.crt
-service-account*.json
-gcp-*.json
-aws-credentials*
-
-# API keys file
 api_keys.txt
 secrets.json
-config/secrets.yaml
 
-# Local configuration overrides
-config.local.json
-settings.local.py
-
-# Documentation builds
-_build/
-.docusaurus/
-
-# Translation files
-*.mo
-*.pot
-
-# Django stuff (if you switch to Django)
-*.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
-
-# Flask stuff (if you add Flask)
-instance/
-.webassets-cache
-
-# Scrapy stuff
-.scrapy
-
-# Sphinx documentation
-docs/_build/
-
-# PyBuilder
-.pybuilder/
-target/
-
-# Celery stuff
-celerybeat-schedule
-celerybeat.pid
-
-# SageMath parsed files
-*.sage.py
-
-# Spyder project settings
-.spyderproject
-.spyproject
-
-# Rope project settings
-.ropeproject
-
-# mkdocs documentation
-/site
-
-# Backup of .env (just in case someone creates it)
-.env.backup
-.env.old
-
-# Session data
-sessions/
-*.session
-
-# Cache directories
+# Cache
 .cache/
 cache/
+.temp/
+.tmp/
 
-# Compiled translations
-*.mo
-
-# Package manager lock files (choose based on your preference)
-# Uncomment if you want to ignore them:
-# Pipfile.lock
-# poetry.lock
-# requirements.lock
-
-# OS generated files
-.fseventsd
-.Spotlight-V100
-.TemporaryItems
-.Trashes
-.VolumeIcon.icns
-.com.apple.timemachine.donotpresent
-
-# Backup files from editors
-*.bak
-*~
-
-# Application logs
-app.log
-error.log
-access.log
-debug.log
-
-# End of .gitignore
+# Documentation (from voice feature branch)
+PHASE1_ARCHITECTURE_ANALYSIS.md
+PHASE1_CHECKPOINT_COMPLETE.md
+PHASE2B_BACKEND_REPLACEMENT_COMPLETE.md
+PHASE2_MERGE_REPORT.md
+PHASE3_COMMIT_COMPLETE.md
+PHASE4_API_CONTRACT_UPDATE_COMPLETE.md
+PHASE5_VOICE_CONVERSION_COMPLETE.md
+PHASE5_VOICE_CONVERSION_PLAN.md
+PHASE6_SUMMARY.md
+PHASE6_VOICE_INTEGRATION_COMPLETE.md
+INTEGRATION_STATUS.md
+NETWORK_ERROR_FIX.md
+VOICE_DEBUG_GUIDE.md
+VOICE_INTEGRATION_SAFETY_REPORT.md
+GIT_PUSH_GUIDE.md
